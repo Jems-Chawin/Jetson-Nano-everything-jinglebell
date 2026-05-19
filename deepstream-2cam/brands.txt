@@ -1,0 +1,1 @@
+This is in the sub-class of "car": Aion, BMW, BYD, Bus, Chevrolet, Ford, GWM, Geely, Haval, Hino, Honda, Isuzu, Jaecoo, Kia, MG, Mazda, Mercedes-Benz, Mini, Mitsubishi, Motorcycle, Neta, Nissan, Peugeot, Proton, Subaru, Suzuki, Tesla, Toyota, Truck, Volkswagen, Wuling.

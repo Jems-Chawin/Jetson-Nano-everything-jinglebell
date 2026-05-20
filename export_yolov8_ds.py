@@ -59,7 +59,7 @@ def main():
     import warnings
     warnings.filterwarnings("ignore")
 
-    weights = "yolov8n.pt"
+    weights = "yolo26n.pt"
     print(f"Starting: {weights}")
 
     device = torch.device("cpu")

@@ -93,6 +93,7 @@ def decodebin_child_added(child_proxy, Object, name, user_data):
     if is_aarch64() and name.find("nvv4l2decoder") != -1:
         Object.set_property("bufapi-version", True)
     if name.find("rtspsrc") != -1:
+        Object.set_property("protocols", 4)
         Object.set_property("latency", 2000)
         Object.set_property("timeout", 5000000)
 

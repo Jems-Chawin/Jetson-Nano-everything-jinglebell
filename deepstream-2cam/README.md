@@ -65,6 +65,7 @@ deepstream-2cam/
 
 ## Troubleshooting
 
+- **RTSP SDP/open errors**: confirm the exact stream URLs are reachable from the Jetson, and try a single source first. The app now forces RTSP over TCP, which is usually more reliable than UDP on flaky networks.
 - **Camera not found**: Check device paths with `v4l2-ctl --list-devices`
 - **Low FPS**: Reduce resolution by editing `MUXER_OUTPUT_WIDTH/HEIGHT` in the script
 - **Engine file error**: Delete any existing `.engine` file and let it regenerate

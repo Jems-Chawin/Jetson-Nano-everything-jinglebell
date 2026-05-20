@@ -1,0 +1,24 @@
+# Python package requirements for Jetson-Nano-everything-jinglebell
+# Note: Some components (DeepStream, GObject introspection, pyds, custom NV libraries)
+# are system packages or provided by NVIDIA and must be installed separately on Jetson.
+
+# Core ML / model tooling
+ultralytics
+torch
+onnx
+onnxruntime
+onnxslim
+
+# Computer vision / arrays
+numpy
+opencv-python
+
+# DeepStream-related Python bindings (install via NVIDIA for Jetson)
+# pyds  # provided by NVIDIA DeepStream (pip wheel for aarch64)
+# gi/pygobject (GObject Introspection) - system package, not via pip
+
+# Misc
+# on Jetson you may prefer `opencv-python-headless` or system OpenCV to match hardware
+
+# Optional / dev
+# onnx-simplifier

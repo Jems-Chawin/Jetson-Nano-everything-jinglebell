@@ -2,8 +2,8 @@
 gpu-id=0
 net-scale-factor=0.0039215697906911373
 model-color-format=0
-onnx-file=/home/jams/fast/DeepStream-Yolo/yolov8n.onnx
-model-engine-file=/home/jams/fast/deepstream-2cam/model_b5_gpu0_fp16.engine
+onnx-file=/home/jams/fast/DeepStream-Yolo/yolo26n.onnx
+model-engine-file=/home/jams/fast/deepstream-2cam/model_b5_gpu0_fp16_yolo26n.engine
 labelfile-path=/home/jams/fast/DeepStream-Yolo/labels.txt
 batch-size=5
 network-mode=2

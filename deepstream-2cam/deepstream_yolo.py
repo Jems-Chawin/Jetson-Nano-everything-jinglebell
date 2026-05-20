@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-DeepStream YOLOv8 + Brand/Color/Speed - Clean version
+DeepStream YOLO26n + Brand/Color/Speed - Clean version
 """
 import sys
 sys.path.append('../')

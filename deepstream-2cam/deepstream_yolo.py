@@ -68,6 +68,7 @@ track_cache = {}
 track_source = {}
 global_frame_count = 0
 fps_streams = {}
+recording_start_time = None
 
 # --- Logs ---
 os.makedirs("logs/frames", exist_ok=True)
@@ -238,8 +239,14 @@ def osd_sink_pad_buffer_probe(pad, info, u_data):
                 # Per-frame log
                 if global_frame_count % FRAME_LOG_INTERVAL == 0:
                     cam_id = track_source.get(track_id, 0)
+                    # use relative timestamp (seconds since recording started)
+                    now_ts = time.time()
+                    if recording_start_time is not None:
+                        ts_val = round(now_ts - recording_start_time, 3)
+                    else:
+                        ts_val = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     entry = {
-                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "timestamp": ts_val,
                         "frame": global_frame_count,
                         "stream_id": cam_id,
                         "track_id": int(track_id),
@@ -294,9 +301,18 @@ def osd_sink_pad_buffer_probe(pad, info, u_data):
                     tc = track_cache[tid]
                     cam_id = track_source.get(tid, 0)
                     speeds = tc.get("speeds", [])
+                    # use relative enter/exit timestamps (seconds since recording started)
+                    enter_abs = tc.get("enter_time", time.time())
+                    exit_abs = time.time()
+                    if recording_start_time is not None:
+                        t_enter = round(enter_abs - recording_start_time, 3)
+                        t_exit = round(exit_abs - recording_start_time, 3)
+                    else:
+                        t_enter = datetime.fromtimestamp(enter_abs).strftime("%Y-%m-%d %H:%M:%S")
+                        t_exit = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     entry = {
-                        "timestamp_enter": datetime.fromtimestamp(tc.get("enter_time", time.time())).strftime("%Y-%m-%d %H:%M:%S"),
-                        "timestamp_exit": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "timestamp_enter": t_enter,
+                        "timestamp_exit": t_exit,
                         "stream_id": cam_id,
                         "track_id": int(tid),
                         "vehicle_type": tc.get("vehicle_type", ""),
@@ -489,6 +505,9 @@ def main(args):
 
     print("Starting pipeline with %d stream(s)..." % num_sources)
     pipeline.set_state(Gst.State.PLAYING)
+    # mark recording start time so logs use relative timestamps (start = 0)
+    global recording_start_time
+    recording_start_time = time.time()
     try:
         loop.run()
     except:

@@ -34,6 +34,24 @@ RTSP_SOURCES = [
     "rtsp://192.168.0.151:8554/stream1",
 ]
 
+# Optional friendly names for each RTSP source. If provided, these are used
+# as the filename base. Example: ["cctv001", "cctv002"] -> logs `cctv001_1.jsonl`.
+RTSP_NAMES = []
+
+
+def get_cam_name(cam_id):
+    """Return a friendly name for a camera (falls back to last path segment).
+
+    Filenames use 1-based indices: <name>_<index>.jsonl
+    """
+    if cam_id is None:
+        return "cam_0"
+    if cam_id < len(RTSP_NAMES) and RTSP_NAMES[cam_id]:
+        return RTSP_NAMES[cam_id]
+    if cam_id < len(RTSP_SOURCES):
+        return RTSP_SOURCES[cam_id].rstrip("/").split("/")[-1]
+    return f"cam_{cam_id+1}"
+
 CLASSIFY_INTERVAL = 30
 MAX_CLASSIFY_PER_FRAME = 4
 
@@ -93,6 +111,20 @@ def classify_color(crop_bgr):
             best_color = name
     conf = max(0.0, 1.0 - (min_dist / 50000.0))
     return best_color, conf
+
+
+def _format_rel_time(sec):
+    """Format seconds as H:MM:SS. If less than 1 minute show 0:SS."""
+    try:
+        s = int(round(float(sec)))
+    except Exception:
+        return str(sec)
+    h = s // 3600
+    m = (s % 3600) // 60
+    sec_only = s % 60
+    if h == 0 and m == 0:
+        return f"0:{sec_only:02d}"
+    return f"{h}:{m:02d}:{sec_only:02d}"
 
 
 def estimate_speed(track_id, cx, cy):
@@ -242,7 +274,7 @@ def osd_sink_pad_buffer_probe(pad, info, u_data):
                     # use relative timestamp (seconds since recording started)
                     now_ts = time.time()
                     if recording_start_time is not None:
-                        ts_val = round(now_ts - recording_start_time, 3)
+                        ts_val = _format_rel_time(now_ts - recording_start_time)
                     else:
                         ts_val = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     entry = {
@@ -258,8 +290,8 @@ def osd_sink_pad_buffer_probe(pad, info, u_data):
                     }
                     lf = log_files_frames.get(cam_id)
                     if lf is None:
-                        name = RTSP_SOURCES[cam_id].rstrip("/").split("/")[-1] if cam_id < len(RTSP_SOURCES) else "cam_%d" % cam_id
-                        lf = open("logs/frames/%s_%d.jsonl" % (name, cam_id), "a")
+                        name = get_cam_name(cam_id)
+                        lf = open(f"logs/frames/{name}_{cam_id+1}.jsonl", "a")
                         log_files_frames[cam_id] = lf
                     lf.write(json.dumps(entry) + "\n")
                     lf.flush()
@@ -305,8 +337,8 @@ def osd_sink_pad_buffer_probe(pad, info, u_data):
                     enter_abs = tc.get("enter_time", time.time())
                     exit_abs = time.time()
                     if recording_start_time is not None:
-                        t_enter = round(enter_abs - recording_start_time, 3)
-                        t_exit = round(exit_abs - recording_start_time, 3)
+                        t_enter = _format_rel_time(enter_abs - recording_start_time)
+                        t_exit = _format_rel_time(exit_abs - recording_start_time)
                     else:
                         t_enter = datetime.fromtimestamp(enter_abs).strftime("%Y-%m-%d %H:%M:%S")
                         t_exit = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -326,8 +358,8 @@ def osd_sink_pad_buffer_probe(pad, info, u_data):
                     }
                     lf = log_files_summary.get(cam_id)
                     if lf is None:
-                        name = RTSP_SOURCES[cam_id].rstrip("/").split("/")[-1] if cam_id < len(RTSP_SOURCES) else "cam_%d" % cam_id
-                        lf = open("logs/summary/%s_%d.jsonl" % (name, cam_id), "a")
+                        name = get_cam_name(cam_id)
+                        lf = open(f"logs/summary/{name}_{cam_id+1}.jsonl", "a")
                         log_files_summary[cam_id] = lf
                     lf.write(json.dumps(entry) + "\n")
                     lf.flush()
